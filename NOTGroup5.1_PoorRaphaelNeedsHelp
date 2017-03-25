@@ -1,0 +1,144 @@
+#include <SoftwareSerial.h>
+int pinRx = 2 , pinTx = 3; // pins on Arduino
+long BaudRate = 9600;
+SoftwareSerial mySerial( pinRx , pinTx );
+
+const int xPin = A0;
+const int yPin = A1;
+const int uPin = 4;
+const int dPin = 5;
+const int rPin = 7;
+const int lPin = 6;
+const int joyPin = 8;
+const int HallLEDPin = 9;
+const int PowerPin = 13;
+const int XbeeComPin = 11;
+
+int x;
+int y;
+
+int t = 4;
+
+int u;
+int d;
+int l;
+int r;
+int j;
+
+int xoff;
+int yoff;
+
+int MegaMessage;
+
+
+
+
+
+void setup() {
+  Serial.begin(BaudRate);
+  Serial.println("XBee Communication Test Start !");
+  Serial.print("BaudRate:");
+  Serial.println(BaudRate);
+  Serial.print("SoftwareSerial Rx Pin#");
+  Serial.println(pinRx, DEC);
+  Serial.print("SoftwareSerial Tx Pin#");
+  Serial.println(pinTx, DEC);
+
+  pinMode(pinRx, INPUT);
+  pinMode(pinTx, OUTPUT);
+  pinMode(xPin, INPUT);
+  pinMode(yPin, INPUT);
+
+
+  pinMode(xPin, INPUT);
+  pinMode(yPin, INPUT);
+  pinMode(uPin, INPUT);
+  digitalWrite(uPin, HIGH);
+  pinMode(dPin, INPUT);
+  digitalWrite(dPin, HIGH);
+  pinMode(lPin, INPUT);
+  digitalWrite(lPin, HIGH);
+  pinMode(rPin, INPUT);
+  digitalWrite(rPin, HIGH);
+  pinMode(joyPin, INPUT);
+  digitalWrite(joyPin, HIGH);
+
+  pinMode(HallLEDPin, OUTPUT);
+  pinMode(PowerPin, OUTPUT);
+  pinMode(XbeeComPin, OUTPUT);
+
+  digitalWrite(PowerPin, HIGH);
+
+
+  mySerial.begin(BaudRate);
+}
+
+void loop() {
+  digitalWrite(XbeeComPin, HIGH);
+  delay(t);
+
+  x = analogRead(xPin) * 255.0 / 1023;
+  y = analogRead(yPin) * 255.0 / 1023;
+    Serial.println("x:");
+    Serial.println(x);
+    Serial.println("y:");
+    Serial.println(y);
+
+  u = digitalRead(uPin);
+  d = digitalRead(dPin);
+  l = digitalRead(lPin);
+  r = digitalRead(rPin);
+  j = digitalRead(joyPin);
+
+    Serial.println("U:");
+    Serial.println(u);
+    Serial.println("D:");
+    Serial.println(d);
+    Serial.println("L:");
+    Serial.println(l);
+    Serial.println("R:");
+    Serial.println(r);
+    Serial.println("J:");
+    Serial.println(j);
+  //
+  //  Serial.println("neg");
+  mySerial.write(255);
+  delay(t);
+  mySerial.write(x);
+  delay(t);
+  mySerial.write(y);
+  delay(t);
+  mySerial.write(u);
+  delay(t);
+  mySerial.write(d);
+  digitalWrite(XbeeComPin, LOW);
+  delay(t);
+  mySerial.write(l);
+  delay(t);
+  mySerial.write(r);
+  delay(t);
+  mySerial.write(j);
+  delay(t);
+
+  while (mySerial.available() > 1 ) {
+
+    MegaMessage = mySerial.read();
+    if (MegaMessage == 123) {
+      Serial.println(MegaMessage);
+      digitalWrite(HallLEDPin, HIGH);
+    }
+    else {
+      digitalWrite(HallLEDPin, LOW);
+    }
+  }
+
+
+
+
+  if (j == 0) {
+    digitalWrite(HallLEDPin, LOW);
+
+  }
+
+
+}
