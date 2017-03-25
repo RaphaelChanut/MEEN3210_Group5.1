@@ -1,0 +1,341 @@
+#include <math.h>
+//#include <SoftwareSerial.h>
+int pinRx = 2 , pinTx = 3;
+//SoftwareSerial mySerial1( pinRx , pinTx );
+#include <DualVNH5019MotorShield.h>
+DualVNH5019MotorShield md;
+//#include <Encoder.h>
+//Encoder encLeft(28, 29);
+//Encoder encRight(50, 51);
+
+
+
+
+int easy = 53;
+boolean tagged = 0;
+unsigned long tagtime = 0;
+unsigned long currenttime = 0;
+boolean buttonstate = 0;
+unsigned long untaggedtime = 0;
+boolean tag = 0;
+
+
+const int PowerPin = 13;
+
+
+
+long BaudRate = 9600 , sysTick = 0;
+
+
+int Com;
+int x;
+int y;
+float xang;
+float yang;
+
+int xmove;
+int ymove;
+
+int ComNum = 7;
+
+int t = 4;
+int lim = 25;
+
+int u;
+int d;
+int l;
+int r;
+int j;
+
+int TeamPin = 37;
+int countTag = 1;
+int countTag2 = 1;
+
+int HallPin = A13;
+int HallLEDPin = 23;
+int HallVal;
+int HallTol = 50;
+
+int newymove;
+int oldymove;
+int err = 0;
+boolean check = 0;
+int kp = (1 / 100);
+
+float ang;
+
+int beg = 0;
+//////////////////////////////END COMMS//////////////////////////////
+
+
+//////////////////////////////MOTOR//////////////////////////////
+//M1 is Right
+//M2 is Left
+#define FL1 2
+#define FL2 4
+#define FR1 7
+#define FR2 8
+
+
+//These pins below, should be PWM pins on arduino
+
+#define pwm1 9
+#define pwm2 10
+
+//////////////////////////////END MOTOR//////////////////////////////
+
+
+
+void setup() {
+
+  Serial.begin(BaudRate);
+  Serial1.begin(BaudRate);
+ //mySerial1.begin(BaudRate);
+  Serial.println("XBee Communication Test Start !");
+  Serial.print("BaudRate:");
+  Serial.println(BaudRate);
+  Serial.print("SoftwareSerial Rx Pin#");
+  Serial.println(pinRx, DEC);
+  Serial.print("SoftwareSerial Tx Pin#");
+  Serial.println(pinTx, DEC);
+
+  pinMode(TeamPin, OUTPUT);
+  pinMode(HallPin, INPUT);
+  pinMode(HallLEDPin, OUTPUT);
+  pinMode(easy, INPUT_PULLUP);
+  pinMode(PowerPin, OUTPUT);
+  Serial.print("SoftwareSerial Tx Pin#");
+
+  digitalWrite(PowerPin, HIGH);
+  digitalWrite(TeamPin, HIGH);
+}
+
+void loop() {
+
+  //HallFunction();
+
+  //tag = easybutton();
+  //TaggedOutFunction(tag);
+
+
+  ReadCom();
+
+          Serial.println("x:");
+          Serial.println(x);
+          Serial.println("y:");
+          Serial.println(y);
+          Serial.println("U:");
+          Serial.println(u);
+          Serial.println("D:");
+          Serial.println(d);
+          Serial.println("L:");
+          Serial.println(l);
+          Serial.println("R:");
+          Serial.println(r);
+          Serial.println("J:");
+          Serial.println(j);
+
+
+//  if (x < 131 && x > 126 &&  y < 125  && y > 123) {
+//    md.setBrakes(300, 300);
+//  }
+//  else {
+//    xang = x * 1023.0 / 255.0 - 513.0;
+//    yang = y * 1023.0 / 255.0 - 497.0;
+//    xmove = map(xang, -513, 505.99, -400, 400);
+//    ymove = map(yang, -497, 521.99, -400, 400);
+//
+//    Serial.print("x:");
+//    Serial.println(xmove);
+//    Serial.print("y:");
+//    Serial.println(ymove);
+//
+//
+//    Move(xmove, ymove);
+//  }
+
+
+
+
+
+
+
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+void ReadCom() {
+  while (Serial1.available() > ComNum) {
+    beg = Serial1.read();
+    if (beg != 255) {
+      continue;
+    }
+    delay(t);
+    Com = Serial1.read();
+    if (Com != 255) {
+      x = Com;
+    }
+    delay(t);
+    Com = Serial1.read();
+    if (Com != 255) {
+      y = Com;
+    }
+    delay(t);
+    Com = Serial1.read();
+    if (Com != 255) {
+      u = Com;
+    }
+    delay(t);
+    Com = Serial1.read();
+    if (Com != 255) {
+      d = Com;
+    }
+    delay(t);
+    Com = Serial1.read();
+    if (Com != 255) {
+      l = Com;
+    }
+    delay(t);
+    Com = Serial1.read();
+    if (Com != 255) {
+      r = Com;
+    }
+    delay(t);
+    Com = Serial1.read();
+    if (Com != 255) {
+      j = Com;
+    }
+    delay(t);
+  }
+}
+
+
+void Move(int xmove, int ymove) {
+  if (xmove < lim && xmove * -1 > lim && ymove < lim && ymove > lim) {
+    md.setBrakes(300, 300);
+  }
+
+
+  if (ymove > lim) {
+    //if (check == 0) {
+    xmove = xmove / 2;
+    ymove = ymove / 2;
+    //oldymove = ymove;
+    md.setSpeeds(-1 * ymove, ymove);
+    //      check = true;
+    //      encLeft.write(0);
+    //      encRight.write(0);
+    //    }
+    //    else {
+    //      xmove = xmove / 2;
+    //      ymove = ymove / 2;
+    //      err = encLeft.read() - encRight.read();  //Calculate error as difference between encoder values
+    //      newymove = oldymove + kp*err;
+    //      md.setSpeeds(-1*ymove, newymove);
+    //      oldymove = newymove;
+    //      encLeft.write(0);
+    //      encRight.write(0);
+    //    }
+  }
+  if (ymove < -1 * lim) {
+    xmove = xmove / 2;
+    ymove = ymove / 2;
+    ymove = -1 * ymove;
+    md.setSpeeds(ymove,  -1 * ymove);
+
+
+  }
+
+  if (xmove > lim) {
+    xmove = xmove / 2;
+    ymove = ymove / 2;
+    md.setSpeeds(-1 * xmove, -1 * xmove);
+
+  }
+  if (xmove < -1 * lim) {
+    xmove = xmove / 2;
+    ymove = ymove / 2;
+    xmove = -1 * xmove;
+    md.setSpeeds(xmove, xmove);
+
+  }
+
+}
+
+
+boolean easybutton(void) {
+  currenttime = millis();
+  buttonstate = digitalRead(easy);
+
+  if (buttonstate == LOW) {
+
+    if (tagged == LOW && (currenttime - tagtime) > 500) {
+      tagged = HIGH;
+      md.setBrakes(300, 300);
+      if (countTag == 1) {
+        digitalWrite(TeamPin, LOW);
+        countTag = 0;
+      }
+      if (countTag == 0) {
+        digitalWrite(TeamPin, HIGH);
+        countTag = 1;
+      }
+      tagtime = millis();
+    }
+
+    if (tagged == HIGH && (currenttime - tagtime) > 500) {
+      tagged = LOW;
+      tagtime = millis();
+    }
+  }
+
+  if ((currenttime - tagtime) > 30000 && tagged == HIGH) {
+    tagged = LOW;
+    digitalWrite(TeamPin, HIGH);
+    tagtime == millis();
+  }
+
+  return tagged;
+}
+
+void TaggedOutFunction(boolean tag) {
+  while (tag == 1) {
+    tag = easybutton();
+    countTag++;
+    if (countTag % 7000 == 0) {
+      if (countTag2 == 1) {
+        digitalWrite(TeamPin, LOW);
+        countTag2 = 0;
+      }
+      else if (countTag2 == 0) {
+        digitalWrite(TeamPin, HIGH);
+        countTag2 = 1;
+      }
+      else if (countTag2 > 23790) {
+        digitalWrite(TeamPin, HIGH);
+      }
+
+    }
+
+    if (tag == 0) {
+      digitalWrite(TeamPin, HIGH);
+    }
+  }
+}
+
+void HallFunction(){
+  HallVal = analogRead(HallPin);
+  Serial.println(HallVal);
+  if (HallVal > HallTol) {
+    digitalWrite(HallLEDPin, HIGH);
+    Serial.println(123);
+    Serial1.write(123);
+    delay(t);
+  }
+  else{
+      digitalWrite(HallLEDPin, LOW);
+  }
+
+}
+
